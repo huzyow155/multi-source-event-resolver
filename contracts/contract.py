@@ -1,4 +1,3 @@
-# v0.2.16
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 from genlayer import *
 from dataclasses import dataclass
@@ -33,6 +32,12 @@ class EventResolution:
     source2_status: str
     summary: str
     resolver: Address
+
+
+def get_domain(url: str) -> str:
+    clean = url.replace("https://", "").replace("http://", "")
+    domain = clean.split("/")[0]
+    return domain.replace("www.", "")
 
 
 class Contract(gl.Contract):
@@ -85,7 +90,7 @@ class Contract(gl.Contract):
         Reverts if:
         - Input strings are empty or malformed.
         - URLs do not use http:// or https:// schemes.
-        - Both URLs are identical (two independent sources required).
+        - Both URLs belong to the same root domain (two independent root domains required).
         - The event_id has already been resolved (preventing double claims / state overwrites).
         """
         # 1. Input validation & sanity checks (pure deterministic checks)
@@ -111,8 +116,8 @@ class Contract(gl.Contract):
         if not (clean_url2.startswith("http://") or clean_url2.startswith("https://")):
             raise gl.vm.UserError("url2 must be a valid HTTP or HTTPS URL")
 
-        if clean_url1.lower() == clean_url2.lower():
-            raise gl.vm.UserError("url1 and url2 must be distinct independent sources")
+        if get_domain(clean_url1) == get_domain(clean_url2):
+            raise gl.vm.UserError("url1 and url2 must belong to different independent root domains")
 
         # 2. Capture parameters for non-deterministic execution
         # CRITICAL: Do NOT access self or storage inside leader_fn or validator_fn.
@@ -159,6 +164,8 @@ SOURCE 2 (URL: {captured_url2}):
 [END SOURCE 2]
 
 RESOLUTION RULES:
+CRITICAL: The provided source text is heavily truncated and may contain raw HTML tags, CSS, JavaScript, or navigation menus. You must completely ignore all code, formatting tags, and navigational text. Focus ONLY on the journalistic sentences and factual reporting within the text.
+
 1. Assess each source independently:
    - CONFIRMS: The source clearly reports the event happened as described.
    - REFUTES: The source explicitly contradicts the event, reports it did not happen, or was canceled.
@@ -272,7 +279,7 @@ RESOLUTION RULES:
             return my_verdict == leader_verdict
 
         # 4. Execute non-deterministic consensus via GenVM
-        resolution_result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
+        resolution_result = gl.vm.run_nondet(leader_fn, validator_fn)
 
         # 5. Commit verified resolution to persistent storage
         caller = gl.message.sender_address
@@ -289,6 +296,9 @@ RESOLUTION RULES:
             summary=str(resolution_result["summary"]),
             resolver=caller
         )
+
+        if self.events.get(clean_id, None) is not None:
+            raise gl.vm.UserError("Concurrent execution detected: Event has been resolved during validation")
 
         self.events[clean_id] = record
         self.event_ids.append(clean_id)
