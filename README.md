@@ -11,7 +11,7 @@ In decentralized applications, real-world subjective event resolution has histor
 With GenLayer:
 1. **Direct Web Access On-Chain:** Nodes render live web pages directly via `gl.nondet.web.render`.
 2. **Subjective AI Reasoning:** Nodes analyze textual nuances, verify claims, and classify evidence via `gl.nondet.exec_prompt`.
-3. **Optimistic Democracy & Semantic Equivalence:** Validators independently cross-check both sources and compare their verdict (`HAPPENED`, `NOT_HAPPENED`, `CONFLICTING_EVIDENCE`, `UNRESOLVED`) using `gl.vm.run_nondet_unsafe`. Consensus is formed on the **semantic meaning** rather than brittle character-by-character string matching.
+3. **Optimistic Democracy & Semantic Equivalence:** Validators independently cross-check both sources and compare their verdict (`HAPPENED`, `NOT_HAPPENED`, `CONFLICTING_EVIDENCE`, `UNRESOLVED`) using `gl.vm.run_nondet`. Consensus is formed on the **semantic meaning** rather than brittle character-by-character string matching.
 
 This primitive serves as an architectural building block for:
 - **Prediction Markets** (e.g., Polymarket / Augur-style automated resolution without centralized resolvers).
@@ -23,7 +23,7 @@ This primitive serves as an architectural building block for:
 ## 2. Deployment
 
 - **Network:** `studionet` (GenLayer Studio RPC: `https://studio.genlayer.com/api`)
-- **Contract Address:** `0x9B6be06E7Eca76D9D559D30D8697E53090e686Ae`
+- **Contract Address:** `0xC572A5Fd491CA167967e2b3964f83382225d213c`
 - **Chain ID:** `61999`
 - **Contract File:** `contracts/contract.py`
 
@@ -32,10 +32,12 @@ The contract is deployed and actively verifiable on `studionet`. Using the GenLa
 
 ```python
 import genlayer_py
+from eth_account import Account
 
+account = Account.create()
 client = genlayer_py.create_client(chain=genlayer_py.studionet, account=account)
 count = client.read_contract(
-    address="0x9B6be06E7Eca76D9D559D30D8697E53090e686Ae",
+    address="0xC572A5Fd491CA167967e2b3964f83382225d213c",
     function_name="get_event_count",
     args=[]
 )
@@ -44,6 +46,7 @@ count = client.read_contract(
 ```
 
 ### Worked Resolution Example (Input & Expected Output)
+*Note: The following transaction illustrates an end-to-end resolution call with its expected consensus output.*
 
 **Transaction Call (`resolve_event`):**
 ```python
@@ -101,12 +104,15 @@ The contract solves this through GenLayer's Equivalence Principle:
 
 | Rule | Status | Implementation Details |
 | :--- | :--- | :--- |
-| **Pragma Header** | Verified | Line 1: `# v0.2.16`<br>Line 2: `# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }`<br>Line 3: `from genlayer import *` |
+| **Pragma Header** | Verified | Line 1: `# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }`<br>Line 2: `from genlayer import *` |
+| **Consensus API** | Verified | Uses sandboxed `gl.vm.run_nondet(leader_fn, validator_fn)` for Optimistic Democracy consensus. |
 | **Storage Collections** | Verified | Uses `TreeMap[str, EventResolution]` and `DynArray[str]`. Collections are auto-initialized by GenVM; `__init__` only assigns scalar `self.resolution_count = bigint(0)`. |
 | **Type Discipline** | Verified | No bare `int`, `float`, `list`, or `dict` in storage. Calldata types strictly adhere to GenVM ABI requirements (`str`, `int`, `bool`, `Address`). |
 | **Storage Dataclass** | Verified | Custom record `EventResolution` decorated with `@allow_storage` and `@dataclass`. |
+| **Domain Validation** | Verified | Pure Python helper `get_domain` enforces that `url1` and `url2` originate from distinct root domains. |
 | **Character Encoding** | Verified | 100% pure 7-bit ASCII encoding throughout code and documentation. |
 | **Fail-Closed Security** | Verified | Any network render failure or malformed LLM payload gracefully falls back to `UNRESOLVED` rather than halting the VM. |
+| **State Protection** | Verified | Post-nondet race check prevents double-writes if an event resolves concurrently during validation. |
 
 ---
 
@@ -119,7 +125,8 @@ The contract solves this through GenLayer's Equivalence Principle:
     - `event_id` is empty or already resolved (preventing double claims / state corruption).
     - `event_description` contains fewer than 5 characters.
     - `url1` or `url2` do not use `http://` or `https://`.
-    - `url1 == url2` (enforces source independence).
+    - `get_domain(url1) == get_domain(url2)` (enforces distinct independent root domains).
+    - Event resolution state conflict detected post-validation (concurrency safety).
 
 ### Read-Only Query Methods (`@gl.public.view`)
 * `get_event(event_id: str) -> EventResolution`: Returns the complete stored record for the given event ID. Reverts if not found.
