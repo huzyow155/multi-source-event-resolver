@@ -214,10 +214,10 @@ def test_validation_errors(direct_deploy):
         contract.resolve_event("id-3", "Valid description", "https://s1.org", "not-a-url")
     assert "valid HTTP or HTTPS URL" in str(excinfo.value)
 
-    # Non-independent sources (same URL)
+    # Non-independent sources (same domain or URL)
     with pytest.raises(Exception) as excinfo:
-        contract.resolve_event("id-4", "Valid description", "https://s1.org/item", "https://s1.org/item")
-    assert "distinct independent sources" in str(excinfo.value)
+        contract.resolve_event("id-4", "Valid description", "https://s1.org/item1", "https://s1.org/item2")
+    assert "different independent root domains" in str(excinfo.value)
 
     # Querying nonexistent event
     with pytest.raises(Exception) as excinfo:
