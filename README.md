@@ -23,7 +23,7 @@ This primitive serves as an architectural building block for:
 ## 2. Deployment & Real On-Chain Evidence
 
 - **Network:** `studionet` (GenLayer Studio RPC: `https://studio.genlayer.com/api`)
-- **Active Contract Address:** [`0xe594F4FCD0A55fE72281c99F1B7872993039a4f8`](https://genlayer-explorer.vercel.app/address/0xe594F4FCD0A55fE72281c99F1B7872993039a4f8)
+- **Active Contract Address:** [`0xe594F4FCD0A55fE72281c99F1B7872993039a4f8`](https://explorer-studio.genlayer.com/address/0xe594F4FCD0A55fE72281c99F1B7872993039a4f8)
 - **Chain ID:** `61999`
 - **Contract File:** `contracts/contract.py`
 - **Superseded Staging Addresses:** `0xC572A5Fd491CA167967e2b3964f83382225d213c` (superseded initial deployment; lacked dual-dict response parsing) and `0x9B6be06E7Eca76D9D559D30D8697E53090e686Ae` (superseded prototype).
@@ -57,7 +57,7 @@ The contract was tested against four distinct real-world scenarios on `studionet
 * **Claim:** "The Python programming language was created by Guido van Rossum"
 * **Source 1:** `https://raw.githubusercontent.com/python/cpython/main/README.rst`
 * **Source 2:** `https://en.wikipedia.org/wiki/Guido_van_Rossum`
-* **Transaction Hash:** [`0xea09d112d9f1134401cd5af2d5099310ce9cf7e5b09bd640d607da5153bda113`](https://genlayer-explorer.vercel.app/tx/0xea09d112d9f1134401cd5af2d5099310ce9cf7e5b09bd640d607da5153bda113)
+* **Transaction Hash:** [`0xea09d112d9f1134401cd5af2d5099310ce9cf7e5b09bd640d607da5153bda113`](https://explorer-studio.genlayer.com/tx/0xea09d112d9f1134401cd5af2d5099310ce9cf7e5b09bd640d607da5153bda113)
 * **Real Consensus State Record (Read from `get_event("evt-python-creator-guido")`):**
 ```json
 {
@@ -79,7 +79,7 @@ The contract was tested against four distinct real-world scenarios on `studionet
 * **Claim:** "Astronaut Neil Armstrong landed on planet Mars during the 1969 space mission"
 * **Source 1:** `https://en.wikipedia.org/wiki/Neil_Armstrong`
 * **Source 2:** `https://raw.githubusercontent.com/nasa/nasa-3d-resources/master/README.md`
-* **Transaction Hash:** [`0x9b22e1a79060b05511136daa3b29aded2744d6b9b5c400dd8a2be55761c272dc`](https://genlayer-explorer.vercel.app/tx/0x9b22e1a79060b05511136daa3b29aded2744d6b9b5c400dd8a2be55761c272dc)
+* **Transaction Hash:** [`0x9b22e1a79060b05511136daa3b29aded2744d6b9b5c400dd8a2be55761c272dc`](https://explorer-studio.genlayer.com/tx/0x9b22e1a79060b05511136daa3b29aded2744d6b9b5c400dd8a2be55761c272dc)
 * **Real Consensus State Record (Read from `get_event("evt-armstrong-mars-1969")`):**
 ```json
 {
@@ -101,7 +101,7 @@ The contract was tested against four distinct real-world scenarios on `studionet
 * **Claim:** "Secret undocumented merger agreement signed between Acme Corp and Omni Corp"
 * **Source 1:** `https://raw.githubusercontent.com/nonexistent-org-12345/nonexistent-repo/main/404.txt`
 * **Source 2:** `https://httpstat.us/404`
-* **Transaction Hash:** [`0x7095534ad546d9479c78ef5deef593a86a432a3f60d0cf372eb9da5741261a5b`](https://genlayer-explorer.vercel.app/tx/0x7095534ad546d9479c78ef5deef593a86a432a3f60d0cf372eb9da5741261a5b)
+* **Transaction Hash:** [`0x7095534ad546d9479c78ef5deef593a86a432a3f60d0cf372eb9da5741261a5b`](https://explorer-studio.genlayer.com/tx/0x7095534ad546d9479c78ef5deef593a86a432a3f60d0cf372eb9da5741261a5b)
 * **Real Consensus State Record (Read from `get_event("evt-unresolved-sources")`):**
 ```json
 {
@@ -123,7 +123,7 @@ The contract was tested against four distinct real-world scenarios on `studionet
 * **Claim:** "SpaceX caught the Super Heavy booster of Starship during flight 5"
 * **Source 1:** `https://en.wikipedia.org/wiki/Starship_integrated_flight_test_5`
 * **Source 2:** `https://www.reuters.com/technology/space/spacex-launches-fifth-starship-test-flight-aims-booster-catch-2024-10-13/`
-* **Transaction Hash:** [`0x833426596d80a42f6443fcca6d438c339f3fee64c40484fd5352573297c23f77`](https://genlayer-explorer.vercel.app/tx/0x833426596d80a42f6443fcca6d438c339f3fee64c40484fd5352573297c23f77)
+* **Transaction Hash:** [`0x833426596d80a42f6443fcca6d438c339f3fee64c40484fd5352573297c23f77`](https://explorer-studio.genlayer.com/tx/0x833426596d80a42f6443fcca6d438c339f3fee64c40484fd5352573297c23f77)
 * **Real Consensus State Record (Read from `get_event("evt-spacex-reuters-unresolved")`):**
 ```json
 {
