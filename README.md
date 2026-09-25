@@ -23,9 +23,10 @@ This primitive serves as an architectural building block for:
 ## 2. Deployment & Real On-Chain Evidence
 
 - **Network:** `studionet` (GenLayer Studio RPC: `https://studio.genlayer.com/api`)
-- **Contract Address:** [`0xe594F4FCD0A55fE72281c99F1B7872993039a4f8`](https://genlayer-explorer.vercel.app/address/0xe594F4FCD0A55fE72281c99F1B7872993039a4f8)
+- **Active Contract Address:** [`0xe594F4FCD0A55fE72281c99F1B7872993039a4f8`](https://genlayer-explorer.vercel.app/address/0xe594F4FCD0A55fE72281c99F1B7872993039a4f8)
 - **Chain ID:** `61999`
 - **Contract File:** `contracts/contract.py`
+- **Superseded Staging Addresses:** `0xC572A5Fd491CA167967e2b3964f83382225d213c` (superseded initial deployment; lacked dual-dict response parsing) and `0x9B6be06E7Eca76D9D559D30D8697E53090e686Ae` (superseded prototype).
 
 ### Live Query Verification (Real Result)
 The contract is deployed and actively verifiable on `studionet`. Querying the live contract state via the GenLayer Python SDK (`genlayer-py`):
@@ -139,7 +140,7 @@ The contract was tested against four distinct real-world scenarios on `studionet
 }
 ```
 
-> **Web Scraping Limitation Note:** Commercial news outlets (such as Reuters, Bloomberg, or the New York Times) employ sophisticated anti-bot shields (Cloudflare Turnstile, Akamai, or mandatory JavaScript paywall interstitial gates). When fetched by node web rendering workers, these endpoints often return 403 Forbidden or empty challenge shells, flagging `source_status: UNAVAILABLE`. For reliable on-chain resolution, use public documentation, institutional repositories, government feeds, or open encyclopedic mirrors (e.g. Wikipedia).
+> **Web Scraping Limitation Note:** Commercial news outlets (such as Reuters, Bloomberg, or the New York Times) employ anti-bot shields (Cloudflare Turnstile, Akamai, or mandatory JavaScript paywall interstitial gates). When fetched by node web rendering workers, these endpoints return 403 Forbidden or challenge shells, flagging `source_status: UNAVAILABLE`. For reliable on-chain resolution, use public documentation, institutional repositories, government feeds, or open encyclopedic mirrors (e.g. Wikipedia).
 
 ---
 
@@ -189,6 +190,7 @@ The contract solves this through GenLayer's Equivalence Principle:
 * `resolve_event(event_id: str, event_description: str, url1: str, url2: str)`:
   Fetches both sources, executes cross-checking consensus, and records the resolution in storage.
   * **Registrable Root-Domain Validation:** Enforces that `url1` and `url2` originate from distinct root domains using `get_domain()`. Handles two-part country code TLDs (e.g. `bbc.co.uk` and `sports.bbc.co.uk` are identified as the same domain and rejected).
+  * **Known Limitations:** `get_domain()` is a simplified suffix matcher, not a full public suffix list, so multi-tenant hosts like `raw.githubusercontent.com`, `github.io`, `vercel.app` etc. collapse to one domain - two genuinely independent sources on the same multi-tenant host will be incorrectly rejected as non-independent.
   * Reverts with `gl.vm.UserError` if:
     - `event_id` is empty or already resolved (preventing double claims / state corruption).
     - `event_description` contains fewer than 5 characters.
