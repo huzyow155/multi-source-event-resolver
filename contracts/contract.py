@@ -36,8 +36,15 @@ class EventResolution:
 
 def get_domain(url: str) -> str:
     clean = url.replace("https://", "").replace("http://", "")
-    domain = clean.split("/")[0]
-    return domain.replace("www.", "")
+    domain = clean.split("/")[0].split(":")[0].lower()
+    if domain.startswith("www."):
+        domain = domain[4:]
+    parts = domain.split(".")
+    if len(parts) >= 3 and parts[-2] in ("co", "com", "org", "gov", "edu", "net", "ac") and len(parts[-1]) == 2:
+        return ".".join(parts[-3:])
+    if len(parts) >= 2:
+        return ".".join(parts[-2:])
+    return domain
 
 
 class Contract(gl.Contract):
@@ -192,16 +199,19 @@ CRITICAL: The provided source text is heavily truncated and may contain raw HTML
 
             try:
                 raw_response = gl.nondet.exec_prompt(prompt, response_format="json")
-                cleaned = str(raw_response).strip()
-                if cleaned.startswith("```json"):
-                    cleaned = cleaned[7:]
-                if cleaned.startswith("```"):
-                    cleaned = cleaned[3:]
-                if cleaned.endswith("```"):
-                    cleaned = cleaned[:-3]
-                cleaned = cleaned.strip()
+                if isinstance(raw_response, dict):
+                    parsed = raw_response
+                else:
+                    cleaned = str(raw_response).strip()
+                    if cleaned.startswith("```json"):
+                        cleaned = cleaned[7:]
+                    if cleaned.startswith("```"):
+                        cleaned = cleaned[3:]
+                    if cleaned.endswith("```"):
+                        cleaned = cleaned[:-3]
+                    cleaned = cleaned.strip()
 
-                parsed = json.loads(cleaned)
+                    parsed = json.loads(cleaned)
 
                 # Normalize and validate verdict
                 raw_verdict = str(parsed.get("verdict", "")).strip().upper()
